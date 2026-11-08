@@ -1,0 +1,30 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/nouribiome}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+
+app:
+  product:
+    price-paise: ${PRODUCT_PRICE_PAISE:79900}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+    base-url: https://api.razorpay.com/v1
+  admin:
+    username: ${ADMIN_USER:admin}
+    password: ${ADMIN_PASSWORD:}
