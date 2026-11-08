@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="NouriBiome UI Regression" parallel="classes" thread-count="2" verbose="1">
+  <listeners>
+    <listener class-name="in.nouribiome.automation.listeners.TestListener"/>
+  </listeners>
+  <test name="Storefront regression">
+    <packages>
+      <package name="in.nouribiome.automation.tests"/>
+    </packages>
+  </test>
+</suite>
