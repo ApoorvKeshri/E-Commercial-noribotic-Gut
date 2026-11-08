@@ -1,0 +1,76 @@
+name: NouriBiome Selenium UI Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "backend/**"
+      - "automation/**"
+      - ".github/workflows/selenium-ui-tests.yml"
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: nouribiome
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nouribiome"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Build Spring Boot application
+        run: mvn -B -f backend/pom.xml clean package -DskipTests
+
+      - name: Start Spring Boot application
+        env:
+          DATABASE_URL: jdbc:postgresql://localhost:5432/nouribiome
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          ADMIN_PASSWORD: ci-only-not-for-production
+        run: |
+          nohup java -jar backend/target/nouribiome-store-1.0.0.jar > backend.log 2>&1 &
+          for i in {1..60}; do
+            if curl -fsS http://localhost:8080/api/config; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat backend.log
+          exit 1
+
+      - name: Run Selenium UI regression tests
+        run: mvn -B -f automation/pom.xml clean test -DbaseUrl=http://localhost:8080 -Dheadless=true
+
+      - name: Upload test reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-test-results
+          path: |
+            automation/target/surefire-reports/
+            automation/target/screenshots/
+            automation/target/allure-results/
+            backend.log
+          if-no-files-found: ignore
