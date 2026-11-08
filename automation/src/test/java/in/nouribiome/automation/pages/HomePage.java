@@ -60,7 +60,7 @@ public class HomePage extends BasePage {
     }
 
     public boolean areNavigationLinksHidden() {
-        return !visible(NAV_LINKS).isDisplayed();
+        return !driver.findElement(NAV_LINKS).isDisplayed();
     }
 
     public void openFirstFaq() {
@@ -68,7 +68,6 @@ public class HomePage extends BasePage {
     }
 
     public boolean isFirstFaqExpanded() {
-        return "true".equals(
-                driver.findElement(FAQ_FIRST_DETAILS).getAttribute("open") != null ? "true" : "false");
+        return driver.findElement(FAQ_FIRST_DETAILS).getAttribute("open") != null;
     }
 }
